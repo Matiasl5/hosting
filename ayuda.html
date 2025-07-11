@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Centro de Ayuda</title>
+  <style>
+    #chatbox {
+      width: 300px;
+      height: 400px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      overflow-y: auto;
+      font-family: Arial, sans-serif;
+    }
+    #userInput {
+      width: 240px;
+      padding: 5px;
+    }
+    #sendBtn {
+      padding: 5px 10px;
+    }
+    .userMsg {
+      color: blue;
+      margin: 5px 0;
+    }
+    .botMsg {
+      color: green;
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Centro de Ayuda</h2>
+  <div id="chatbox"></div>
+  <input id="userInput" type="text" placeholder="Escribí tu consulta..." />
+  <button id="sendBtn">Enviar</button>
+
+  <script>
+    const chatbox = document.getElementById('chatbox');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    // Base de respuestas simples
+    const respuestas = {
+      "horario": "Nuestro horario de atención es de 9 a 18 hs, de lunes a viernes.",
+      "precio": "Los precios están detallados en la sección 'Servicios' de nuestra página.",
+      "envío": "Realizamos envíos a todo el país en 3 a 5 días hábiles.",
+      "contacto": "Podés contactarnos vía email a contacto@ejemplo.com",
+      "default": "Perdón, no entendí tu consulta. ¿Podés reformularla?"
+    };
+
+    function addMessage(text, clase) {
+      const p = document.createElement('p');
+      p.className = clase;
+      p.textContent = text;
+      chatbox.appendChild(p);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    function responder(texto) {
+      texto = texto.toLowerCase();
+      for (let clave in respuestas) {
+        if (texto.includes(clave)) {
+          return respuestas[clave];
+        }
+      }
+      return respuestas["default"];
+    }
+
+    sendBtn.addEventListener('click', () => {
+      const pregunta = userInput.value.trim();
+      if (!pregunta) return;
+      addMessage("Tú: " + pregunta, "userMsg");
+      const respuesta = responder(pregunta);
+      addMessage("Bot: " + respuesta, "botMsg");
+      userInput.value = "";
+      userInput.focus();
+    });
+
+    // Para enviar con Enter
+    userInput.addEventListener('keypress', (e) => {
+      if (e.key === "Enter") sendBtn.click();
+    });
+  </script>
+
+</body>
+</html>
