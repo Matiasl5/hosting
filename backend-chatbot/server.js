@@ -1,9 +1,3 @@
-import cors from 'cors';
-
-app.use(cors({
-  origin: 'https://matiasl5.github.io'
-}));
-
 import express from 'express';
 import cors from 'cors';
 import fetch from 'node-fetch';
@@ -12,7 +6,10 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
-app.use(cors());
+
+app.use(cors({
+  origin: 'https://matiasl5.github.io'
+}));
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
@@ -44,3 +41,4 @@ app.post('/chat', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en puerto ${PORT}`);
 });
+
