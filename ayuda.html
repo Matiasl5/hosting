@@ -4,96 +4,131 @@
   <meta charset="UTF-8" />
   <title>Bot IA Ayuda</title>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
-    #chat { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; }
-    .message { margin: 10px 0; }
-    .user { color: blue; }
-    .bot { color: green; }
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f4f4f4;
+    }
+    #chat {
+      border: 1px solid #ccc;
+      background: #fff;
+      height: 350px;
+      padding: 10px;
+      overflow-y: auto;
+      margin-bottom: 15px;
+      border-radius: 5px;
+    }
+    .message {
+      margin: 8px 0;
+      padding: 8px 12px;
+      border-radius: 15px;
+      max-width: 80%;
+      clear: both;
+      word-wrap: break-word;
+    }
+    .user {
+      background: #0084ff;
+      color: white;
+      float: right;
+      text-align: right;
+    }
+    .bot {
+      background: #e5e5ea;
+      color: #000;
+      float: left;
+      text-align: left;
+    }
+    #inputMensaje {
+      width: 80%;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+    #btnEnviar {
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: none;
+      background: #0084ff;
+      color: white;
+      cursor: pointer;
+    }
+    #btnEnviar:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
-
   <h1>Bot IA Ayuda</h1>
 
   <div id="chat"></div>
 
-  <input type="text" id="inputMensaje" placeholder="Escribí tu pregunta..." style="width: 80%;" />
+  <input
+    id="inputMensaje"
+    type="text"
+    placeholder="Escribí tu pregunta..."
+    autocomplete="off"
+  />
   <button id="btnEnviar">Enviar</button>
 
   <script>
-    const chatDiv = document.getElementById('chat');
-    const input = document.getElementById('inputMensaje');
-    const btn = document.getElementById('btnEnviar');
+    const chatDiv = document.getElementById("chat");
+    const input = document.getElementById("inputMensaje");
+    const btn = document.getElementById("btnEnviar");
 
-    // Historial de mensajes para enviar al backend
+    // Historial para enviar al backend (empezamos con instrucciones para el sistema)
     const mensajes = [
       { role: "system", content: "Sos un asistente útil y amable." }
     ];
 
-    // Función para agregar mensaje al chat
+    // Agrega un mensaje a la ventana de chat
     function agregarMensaje(texto, clase) {
-      const div = document.createElement('div');
-      div.className = 'message ' + clase;
+      const div = document.createElement("div");
+      div.className = "message " + clase;
       div.textContent = texto;
       chatDiv.appendChild(div);
       chatDiv.scrollTop = chatDiv.scrollHeight;
     }
 
-    // Función para enviar mensaje al backend
     async function enviarPregunta(mensajes) {
+      btn.disabled = true;
       try {
-        const response = await fetch("https://hosting-8gvx.onrender.com/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: mensajes })
-        });
+        const response = await fetch(
+          "https://hosting-2-3ibr.onrender.com/chat",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ messages: mensajes }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Error en la respuesta del servidor");
+        }
+
         const data = await response.json();
         return data;
       } catch (error) {
         agregarMensaje("Error al comunicarse con el servidor.", "bot");
         console.error(error);
+      } finally {
+        btn.disabled = false;
       }
     }
 
-    btn.addEventListener('click', async () => {
+    btn.addEventListener("click", async () => {
       const textoUsuario = input.value.trim();
       if (!textoUsuario) return;
 
-      // Mostrar mensaje usuario
-      agregarMensaje(textoUsuario, 'user');
-
-      // Agregar mensaje usuario al historial
+      agregarMensaje(textoUsuario, "user");
       mensajes.push({ role: "user", content: textoUsuario });
 
-      input.value = '';
+      input.value = "";
       agregarMensaje("Escribiendo...", "bot");
 
-      // Enviar al backend y esperar respuesta
-      const respuesta = await enviarPregunta(mensajes);
-
-      // Remover "Escribiendo..."
-      const escribiendo = chatDiv.querySelector('.bot:last-child');
-      if (escribiendo && escribiendo.textContent === "Escribiendo...") {
-        chatDiv.removeChild(escribiendo);
-      }
-
-      if (respuesta && respuesta.choices && respuesta.choices.length > 0) {
-        const textoBot = respuesta.choices[0].message.content;
-        agregarMensaje(textoBot, 'bot');
-
-        // Agregar respuesta bot al historial
-        mensajes.push({ role: "assistant", content: textoBot });
-      } else {
-        agregarMensaje("No se recibió respuesta válida.", "bot");
-      }
-    });
-
-    // También enviar con Enter
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        btn.click();
-      }
-    });
-  </script>
-</body>
-</html>
+      const respuesta = await env
