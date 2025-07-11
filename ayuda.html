@@ -2,95 +2,69 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Centro de Ayuda IA</title>
+  <title>Chat con OpenAI</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      padding: 20px;
-    }
-    #chatbox {
-      width: 100%;
-      max-width: 600px;
-      margin: auto;
-      background: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    .msg {
-      margin: 10px 0;
-    }
-    .user {
-      color: #007bff;
-      font-weight: bold;
-    }
-    .bot {
-      color: #28a745;
-    }
-    input, button {
-      padding: 10px;
-      font-size: 16px;
-    }
-    #input {
-      width: 75%;
-      margin-right: 10px;
-    }
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #chat { max-width: 600px; margin: auto; }
+    .msg { margin: 10px 0; }
+    .user { color: blue; }
+    .bot { color: green; }
   </style>
 </head>
 <body>
-  <div id="chatbox">
-    <div id="chat"></div>
-    <input type="text" id="input" placeholder="Escribí tu consulta..." />
-    <button onclick="enviar()">Enviar</button>
-  </div>
+  <h2>Chat con OpenAI GPT-3.5 Turbo</h2>
+  <div id="chat"></div>
+  <input type="text" id="input" placeholder="Escribí tu pregunta..." style="width: 80%;" />
+  <button onclick="enviar()">Enviar</button>
 
   <script>
-    const API_KEY = "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"; 
-    const chat = document.getElementById("chat");
+    const API_KEY = "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";
+
+    const chatDiv = document.getElementById("chat");
     const input = document.getElementById("input");
 
     let mensajes = [
-      {
-        role: "system",
-        content: "Sos un asistente de soporte que responde de forma breve y clara sobre temas de caracter legal, por ejemplo te dice si un delito es penal, civil, etc. recuerda responder a saludos"
-      }
+      { role: "system", content: "Sos un asistente útil y claro." }
     ];
 
     async function enviar() {
       const texto = input.value.trim();
       if (!texto) return;
 
-      chat.innerHTML += `<div class="msg user">👤 Vos: ${texto}</div>`;
-      mensajes.push({ role: "user", content: texto });
+      chatDiv.innerHTML += `<div class="msg user"><strong>Tú:</strong> ${texto}</div>`;
       input.value = "";
-      input.disabled = true;
+
+      mensajes.push({ role: "user", content: texto });
 
       try {
-        const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        const res = await fetch("https://api.openai.com/v1/chat/completions", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + API_KEY,
-            "HTTP-Referer": "https://matiasl5.github.io"
+            "Authorization": "Bearer " + API_KEY
           },
           body: JSON.stringify({
-            model: "mistralai/mistral-7b-instruct",
+            model: "gpt-3.5-turbo",
             messages: mensajes
           })
         });
 
+        if (!res.ok) {
+          chatDiv.innerHTML += `<div class="msg bot">⚠️ Error ${res.status}: ${res.statusText}</div>`;
+          return;
+        }
+
         const data = await res.json();
         const respuesta = data.choices[0].message.content;
-        mensajes.push({ role: "assistant", content: respuesta });
-        chat.innerHTML += `<div class="msg bot">🤖 IA: ${respuesta}</div>`;
-      } catch (error) {
-        chat.innerHTML += `<div class="msg bot">⚠️ Error al conectar con la IA.</div>`;
-      }
 
-      chat.scrollTop = chat.scrollHeight;
-      input.disabled = false;
-      input.focus();
+        mensajes.push({ role: "assistant", content: respuesta });
+
+        chatDiv.innerHTML += `<div class="msg bot"><strong>IA:</strong> ${respuesta}</div>`;
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+
+      } catch (error) {
+        chatDiv.innerHTML += `<div class="msg bot">🚨 Error: ${error.message}</div>`;
+      }
     }
 
     input.addEventListener("keypress", (e) => {
