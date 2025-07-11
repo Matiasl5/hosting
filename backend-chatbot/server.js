@@ -1,3 +1,9 @@
+import cors from 'cors';
+
+app.use(cors({
+  origin: 'https://matiasl5.github.io'
+}));
+
 import express from 'express';
 import cors from 'cors';
 import fetch from 'node-fetch';
